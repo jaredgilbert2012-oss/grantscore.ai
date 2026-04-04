@@ -19,25 +19,28 @@
 # exhibiting strong preliminary data, mechanistic clarity,
 # investigator credentials, and explicit gap statements.
 
-# ── TIER 1: Strong funded (top decile, scores ~10–18 percentile) ──
-strong_funded = [
-    """...""",
-]
+funded_examples = [
 
-# ── TIER 2: Borderline funded (payline edge, scores ~19–28 percentile) ──
-borderline_funded = [
-    """...""",
-]
+    # [1] Replace with real NIH Reporter abstract
+    # Source: NIH Reporter | Project #: XXXXXXX | FY: 202X
+    """
+    PLACEHOLDER — paste a real funded abstract here.
+    Find at reporter.nih.gov → Advanced Search → R01 → Mental Health keyword.
+    """,
 
-# ── TIER 3: Constructed weak examples (illustrative low-scoring) ──
-# Replace with real unfunded abstracts once data partnership is active
-weak_examples = [
-    """...""",
-]
+    # [2] Replace with real NIH Reporter abstract
+    # Source: NIH Reporter | Project #: XXXXXXX | FY: 202X
+    """
+    PLACEHOLDER — paste a second funded abstract here.
+    """,
 
-# Combined lists used by the app
-funded_examples   = strong_funded + borderline_funded
-unfunded_examples = weak_examples
+    # [3] Replace with real NIH Reporter abstract
+    # Source: NIH Reporter | Project #: XXXXXXX | FY: 202X
+    """
+    PLACEHOLDER — paste a third funded abstract here.
+    """,
+
+]
 
 # ── UNFUNDED / WEAK EXAMPLES ─────────────────────────────────
 # These abstracts represent applications that were not funded
@@ -73,6 +76,18 @@ unfunded_examples = [
     compare two groups of patients over six months and measure their
     anxiety levels before and after treatment. Results will contribute to
     the literature on anxiety treatment and inform clinical practice.
+    """,
+
+      # [4] Weak example — othing novel, no mechanism, no gap statement, nothing that advances the field
+    """
+  Building on extensive prior research demonstrating the relationship 
+between stress and depression, we will conduct a randomized controlled 
+trial testing cognitive behavioral therapy versus medication management 
+in adults with moderate depression. We will recruit 120 participants 
+from outpatient clinics and assess outcomes at 3, 6, and 12 months 
+using validated instruments including the PHQ-9 and HAM-D. Our team 
+has conducted prior studies in this area. Results will inform clinical 
+practice guidelines for depression treatment selection.
     """,
 
 ]
