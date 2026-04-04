@@ -1,2 +1,3 @@
 anthropic
 streamlit
+pinecone-client
