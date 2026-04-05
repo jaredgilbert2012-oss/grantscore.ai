@@ -27,7 +27,7 @@ st.caption("Predictive grant scoring powered by historical outcome data.")
 st.divider()
 
 # ── Corpus (managed in corpus.py) ────────────────────────────
-from corpus import funded_examples, unfunded_examples
+from corpus import funded_examples_text, unfunded_examples_text
 
 NIH_RUBRIC = """
 SCORING FRAMEWORK — NIH Peer Review Criteria
@@ -85,12 +85,12 @@ if not api_key:
 # ── Scoring logic ─────────────────────────────────────────────
 def build_prompt(draft, agency, mechanism):
     funded_block = ""
-    for i, ex in enumerate(funded_examples, 1):
-        funded_block += f"\n[Funded Example {i}]\n{ex.strip()}\n"
+    for i, ex in enumerate(funded_examples_text, 1):
+    funded_block += f"\n[Funded Example {i}]\n{ex.strip()}\n"
 
     unfunded_block = ""
-    for i, ex in enumerate(unfunded_examples, 1):
-        unfunded_block += f"\n[Unfunded Example {i}]\n{ex.strip()}\n"
+    for i, ex in enumerate(unfunded_examples_text, 1):
+    unfunded_block += f"\n[Unfunded Example {i}]\n{ex.strip()}\n"
 
     return f"""You are a chartered {agency} peer reviewer who has served on standing study sections
 for 20+ years and scored thousands of {mechanism} applications.
