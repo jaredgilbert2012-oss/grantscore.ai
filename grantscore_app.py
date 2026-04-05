@@ -26,39 +26,8 @@ st.title("🎯 GrantScore AI")
 st.caption("Predictive grant scoring powered by historical outcome data.")
 st.divider()
 
-# ── Corpus (paste your real examples here) ───────────────────
-funded_examples = [
-    """
-    We propose a rigorous, multi-site randomized controlled trial to evaluate the efficacy
-    of a novel immunotherapy approach for treatment-resistant glioblastoma. Our preliminary
-    data (n=47) demonstrates a 34% reduction in tumor volume at 12 weeks (p<0.001), with
-    a well-characterized mechanistic pathway involving PD-L1 checkpoint modulation.
-    The proposed work directly addresses a critical gap in the literature and builds on
-    our team's 15 years of combined expertise in neuro-oncology and immunology.
-    """,
-    """
-    This proposal addresses the urgent public health challenge of antimicrobial resistance
-    through a novel synthetic biology approach. We have identified a previously undescribed
-    mechanism by which Klebsiella pneumoniae evades standard antibiotic treatment.
-    Using CRISPR-based gene editing and high-throughput screening, we will systematically
-    characterize this pathway and identify druggable targets. Our team has published
-    12 peer-reviewed papers on this organism and holds two relevant patents.
-    """,
-]
-
-unfunded_examples = [
-    """
-    Cancer is a major health problem in the United States. We propose to study whether
-    a new drug might help patients with cancer. We will recruit patients from our hospital
-    and give them the drug to see if it helps. We expect this research will be important
-    for understanding cancer better.
-    """,
-    """
-    Mental health is increasingly recognized as important. This project will investigate
-    stress in college students using surveys and interviews. We hope to find out what
-    causes stress and what might help. The findings will be useful for universities.
-    """,
-]
+# ── Corpus (managed in corpus.py) ────────────────────────────
+from corpus import funded_corpus, unfunded_corpus
 
 NIH_RUBRIC = """
 SCORING FRAMEWORK — NIH Peer Review Criteria
