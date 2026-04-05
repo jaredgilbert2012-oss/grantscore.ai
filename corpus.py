@@ -25,7 +25,7 @@ funded_examples = [
         "label": "funded",
         "tier": "strong",
         "institution": "Medical School / Academic Medical Center",
-        "study_section": "Special Emphasis Panel[ZRG1 PSE-H (55)]",  # fill in if you find it
+        "study_section": "Special Emphasis Panel[ZRG1 PSE-H (55)]",
         "fiscal_year": "2023",
         "source": "NIH Reporter R01AG075927",
         "pi": "Bennett, David A.",
