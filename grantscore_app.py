@@ -64,7 +64,7 @@ with st.sidebar:
 
 # ── Main input ───────────────────────────────────────────────
 st.subheader("Paste your grant abstract or specific aims")
-
+st.caption("📊 NIH convention: lower scores = stronger application (10 = exceptional, 90 = poor)")
 draft_text = st.text_area(
     label="Grant draft",
     placeholder="Paste your abstract or specific aims page here...",
@@ -109,7 +109,8 @@ Agency: {agency} | Mechanism: {mechanism}
 
 Evaluate using the five criteria. Respond in exactly this format:
 
-PREDICTED SCORE: [0–100]
+PREDICTED SCORE: [1–100 NIH-style, where 10 = exceptional/top 10%, 
+90 = poor, matching actual NIH percentile scoring]
 ESTIMATED PERCENTILE: [e.g. "Top 10–15%"]
 CONFIDENCE: [Low/Medium/High] — [one sentence reason]
 
