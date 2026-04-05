@@ -63,46 +63,86 @@ funded_examples = [
 # or well-constructed weak examples that illustrate common gaps.
 
 unfunded_examples = [
-
-    # [1] Weak example — vague significance, no preliminary data
-    """
+    {
+        "text": """
     Mental health is increasingly recognized as important. This project
     will investigate stress in college students using surveys and interviews.
     Students will complete questionnaires about their stress levels and we
     will analyze the results. We hope to find out what causes stress and
     what might help. The findings will be useful for universities trying
     to support student wellbeing.
-    """,
-
-    # [2] Weak example — no mechanistic rationale, no credentials
-    """
+        """,
+        "label": "unfunded",
+        "tier": "weak",
+        "institution": "unknown",
+        "study_section": "unknown",
+        "fiscal_year": "constructed",
+        "source": "constructed",
+        "pi": "unknown",
+        "award_amount": 0,
+        "notes": "Weak example — vague significance, no preliminary data"
+    },
+    {
+        "text": """
     Depression affects many people and is a serious problem. We want to
     understand what causes depression and how we can help people who suffer
     from it. We will recruit patients from local clinics and give them
     questionnaires. Our team is interested in this area and has been
     working on mental health topics for several years. We believe this
     research will be significant and publishable.
-    """,
-
-    # [3] Weak example — generic methods, no gap statement
-    """
+        """,
+        "label": "unfunded",
+        "tier": "weak",
+        "institution": "unknown",
+        "study_section": "unknown",
+        "fiscal_year": "constructed",
+        "source": "constructed",
+        "pi": "unknown",
+        "award_amount": 0,
+        "notes": "Weak example — no mechanistic rationale, no credentials"
+    },
+    {
+        "text": """
     Anxiety disorders are common in the United States. This study will
     examine whether therapy helps people with anxiety feel better. We will
     compare two groups of patients over six months and measure their
     anxiety levels before and after treatment. Results will contribute to
     the literature on anxiety treatment and inform clinical practice.
-    """,
-
-      # [4] Weak example — othing novel, no mechanism, no gap statement, nothing that advances the field
-    """
-  Building on extensive prior research demonstrating the relationship 
-between stress and depression, we will conduct a randomized controlled 
-trial testing cognitive behavioral therapy versus medication management 
-in adults with moderate depression. We will recruit 120 participants 
-from outpatient clinics and assess outcomes at 3, 6, and 12 months 
-using validated instruments including the PHQ-9 and HAM-D. Our team 
-has conducted prior studies in this area. Results will inform clinical 
-practice guidelines for depression treatment selection.
-    """,
-
+        """,
+        "label": "unfunded",
+        "tier": "weak",
+        "institution": "unknown",
+        "study_section": "unknown",
+        "fiscal_year": "constructed",
+        "source": "constructed",
+        "pi": "unknown",
+        "award_amount": 0,
+        "notes": "Weak example — generic methods, no gap statement"
+    },
+    {
+        "text": """
+    Building on extensive prior research demonstrating the relationship
+    between stress and depression, we will conduct a randomized controlled
+    trial testing cognitive behavioral therapy versus medication management
+    in adults with moderate depression. We will recruit 120 participants
+    from outpatient clinics and assess outcomes at 3, 6, and 12 months
+    using validated instruments including the PHQ-9 and HAM-D. Our team
+    has conducted prior studies in this area. Results will inform clinical
+    practice guidelines for depression treatment selection.
+        """,
+        "label": "unfunded",
+        "tier": "weak",
+        "institution": "unknown",
+        "study_section": "unknown",
+        "fiscal_year": "constructed",
+        "source": "constructed",
+        "pi": "unknown",
+        "award_amount": 0,
+        "notes": "Weak example — technically competent but completely incremental"
+    },
 ]
+
+# ── Flat text lists for Stage 1 prompt ───────────────────────
+# Stage 2 will use the full dicts directly for Pinecone metadata
+funded_examples_text   = [entry["text"] for entry in funded_examples]
+unfunded_examples_text = [entry["text"] for entry in unfunded_examples]
