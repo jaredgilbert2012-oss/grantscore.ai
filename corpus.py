@@ -19,7 +19,7 @@
 # exhibiting strong preliminary data, mechanistic clarity,
 # investigator credentials, and explicit gap statements.
 
-funded_corpus = [
+funded_examples = [
     {
         "text": """[Abstract text from Bennett grant here]""",
         "label": "funded",
@@ -62,7 +62,7 @@ funded_corpus = [
 # or scored poorly. Use anonymized real examples where possible,
 # or well-constructed weak examples that illustrate common gaps.
 
-unfunded_corpus = [
+unfunded_examples = [
 
     # [1] Weak example — vague significance, no preliminary data
     """
