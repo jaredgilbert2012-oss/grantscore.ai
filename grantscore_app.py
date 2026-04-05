@@ -27,7 +27,7 @@ st.caption("Predictive grant scoring powered by historical outcome data.")
 st.divider()
 
 # ── Corpus (managed in corpus.py) ────────────────────────────
-from corpus import funded_corpus, unfunded_corpus
+from corpus import funded_examples, unfunded_examples
 
 NIH_RUBRIC = """
 SCORING FRAMEWORK — NIH Peer Review Criteria
