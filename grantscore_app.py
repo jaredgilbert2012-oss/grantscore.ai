@@ -86,11 +86,11 @@ if not api_key:
 def build_prompt(draft, agency, mechanism):
     funded_block = ""
     for i, ex in enumerate(funded_examples_text, 1):
-    funded_block += f"\n[Funded Example {i}]\n{ex.strip()}\n"
+        funded_block += f"\n[Funded Example {i}]\n{ex.strip()}\n"
 
     unfunded_block = ""
     for i, ex in enumerate(unfunded_examples_text, 1):
-    unfunded_block += f"\n[Unfunded Example {i}]\n{ex.strip()}\n"
+        unfunded_block += f"\n[Unfunded Example {i}]\n{ex.strip()}\n"
 
     return f"""You are a chartered {agency} peer reviewer who has served on standing study sections
 for 20+ years and scored thousands of {mechanism} applications.
