@@ -64,6 +64,17 @@ Reviewers evaluate five criteria, each scored 1 (exceptional) to 9 (poor):
    collaborating sites identified for multi-site studies, existing cohorts
    or infrastructure leveraged.
 
+SCALE CALIBRATION: Consider the mechanism type when applying corpus 
+comparisons. A well-designed R21 exploratory application should not be 
+penalized for lacking the infrastructure of a multi-site R01 cohort study. 
+Score relative to what is appropriate and achievable for the stated mechanism.
+
+PROFILE-ABSTRACT CONSISTENCY: When an investigator profile is provided, 
+assess whether the abstract reflects it. Strong investigators who fail to 
+reference their preliminary data, prior funding, or institutional resources 
+in the abstract are missing a significant opportunity — note this explicitly 
+as a presentation gap rather than a scientific gap.
+
 NOTE: Following NIH convention — lower scores = stronger application.
 Score of 10 = exceptional (top 10%), 50 = average, 90 = poor.
 """
