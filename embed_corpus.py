@@ -64,11 +64,14 @@ def get_embedding(text):
     Convert a text abstract into a 1536-dimensional vector
     using Anthropic's voyage-3 embedding model.
     """
-    response = client.embeddings.create(
+   import voyageai
+    vo = voyageai.Client(api_key=os.environ.get("VOYAGE_API_KEY", ""))
+    response = vo.embed(
+        [text.strip()],
         model="voyage-3",
-        input=[text.strip()]
+        input_type="document"
     )
-    return response.embeddings[0].values
+    return response.embeddings[0]
 
 
 # ── Upload function ───────────────────────────────────────────
