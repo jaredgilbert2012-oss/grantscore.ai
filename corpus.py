@@ -19,7 +19,7 @@
 # exhibiting strong preliminary data, mechanistic clarity,
 # investigator credentials, and explicit gap statements.
 
-funded_examples = [
+funded_corpus = [
     {
         "text": """Identifying molecular drivers of Alzheimer’s disease and related dementias (AD/ADRD) pathologies is an urgent public health priority. This is especially important in persons of African Ancestry. The overall goal of the proposed study is to identify genes and proteins that drive common AD/ADRD pathologic traits. We previously used multi-level omics to identify molecular drivers of AD/ADRD pathologic traits in non-Latinx whites. The proposed study, submitted in response to NOT-AG-18-053 will extend this work by leveraging an unique, ongoing, diverse study being conducted in Sao Paulo, Brazil, called “Pathology, Alzheimer´s and Related Dementias Study” (PARDoS) and five other diverse cohorts in the USA, with whole genome sequencing (WGS) on more than 1350 diverse autopsied participants. PARDoS is prospectively generating neuropathologic and clinical AD/ADRD traits, and DNA on admixed Brazilians of European and African, and to a lesser extent Native Brazilian ancestry. The proposal has the following Aims. Aim 1 will generate WGS on an additional 7650 persons in collaboration with the Alzheimer’s Disease Sequencing Project (ADSP). Aim 2 will perform deep admixture mapping of known SNPs for Alzheimer’s dementia, to determine their associations with AD/ADRD neuropathologic phenotypes in 6500 admixed Brazilian brains followed generalization to 300 diverse brains from the USA, and discovery analyses for 5500 Brazilians followed by generalization to 2000 diverse samples in the USA. Aim 3 will computationally determine telomere length (TL) and examine their association with AD/ADRD clinical and pathologic traits. An exploratory analysis will examine for rare variant associations with AD/ADRD neuropathologic traits. Aim 5 will examine the association of mitochondrial DNA to AD/ADRD traits.""",
         "label": "funded",
@@ -122,7 +122,7 @@ funded_examples = [
 # or scored poorly. Use anonymized real examples where possible,
 # or well-constructed weak examples that illustrate common gaps.
 
-unfunded_examples = [
+unfunded_corpus = [
     {
         "text": """
     Mental health is increasingly recognized as important. This project
@@ -205,5 +205,5 @@ unfunded_examples = [
 
 # ── Flat text lists for Stage 1 prompt ───────────────────────
 # Stage 2 will use the full dicts directly for Pinecone metadata
-funded_examples_text   = [entry["text"] for entry in funded_examples]
-unfunded_examples_text = [entry["text"] for entry in unfunded_examples]
+funded_examples_text   = [entry["text"] for entry in funded_corpus]
+unfunded_examples_text = [entry["text"] for entry in unfunded_corpus]
