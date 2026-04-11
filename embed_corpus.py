@@ -11,47 +11,38 @@
 #   - Run locally (Terminal or Colab) — NOT part of the Streamlit app
 #
 # PREREQUISITES:
-#   pip install anthropic pinecone-client
+#   pip3 install anthropic pinecone voyageai
 #   Pinecone index created at pinecone.io with:
-#     - Dimensions: 1536
+#     - Dimensions: 1024  (voyage-3 outputs 1024 dimensions)
 #     - Metric: cosine
 #     - Name: grantscore-corpus (or update INDEX_NAME below)
 #
-# USAGE:
-#   python embed_corpus.py
+# ENVIRONMENT VARIABLES REQUIRED (set in terminal before running):
+#   export ANTHROPIC_API_KEY="sk-ant-..."
+#   export PINECONE_API_KEY="..."
+#   export VOYAGE_API_KEY="pa-..."
 #
-# EXPECTED OUTPUT:
-#   Embedding funded example 1/8: Bennett, David A. ...
-#   Embedding funded example 2/8: Williams, Paige L. et al. ...
-#   ...
-#   Uploading 8 funded vectors to Pinecone...
-#   Uploading 4 unfunded vectors to Pinecone...
-#   Done! Total vectors in index: 12
+# USAGE:
+#   python3 embed_corpus.py
 # ============================================================
 
-import anthropic
-from pinecone import Pinecone
 import os
-
-# ── Configuration ─────────────────────────────────────────────
-# Replace with your actual keys before running.
-# Never commit real keys to GitHub — use environment variables
-# in production (os.environ.get("ANTHROPIC_API_KEY"))
-
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-PINECONE_API_KEY  = os.environ.get("PINECONE_API_KEY", "")
-INDEX_NAME        = "grantscore-corpus"
-
-# ── Corpus import ─────────────────────────────────────────────
-# Imports the full dict lists (not the flat text lists)
-# corpus.py must be in the same directory as this script
-
+import anthropic
+import voyageai
+from pinecone import Pinecone
 from corpus import funded_corpus, unfunded_corpus
 
+# ── Configuration ─────────────────────────────────────────────
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+PINECONE_API_KEY  = os.environ.get("PINECONE_API_KEY", "")
+VOYAGE_API_KEY    = os.environ.get("VOYAGE_API_KEY", "")
+INDEX_NAME        = "grantscore-corpus"
+
 # ── Connect to services ───────────────────────────────────────
-print("Connecting to Anthropic and Pinecone...")
+print("Connecting to services...")
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+vo     = voyageai.Client(api_key=VOYAGE_API_KEY)
 pc     = Pinecone(api_key=PINECONE_API_KEY)
 index  = pc.Index(INDEX_NAME)
 
@@ -61,11 +52,11 @@ print(f"Connected. Current index size: "
 # ── Embedding function ────────────────────────────────────────
 def get_embedding(text):
     """
-    Convert a text abstract into a 1536-dimensional vector
-    using Anthropic's voyage-3 embedding model.
+    Convert a text abstract into a vector using Voyage AI's
+    voyage-3 model. input_type="document" is used for corpus
+    items being stored. Use input_type="query" in retriever.py
+    for the incoming grant draft being searched.
     """
-   import voyageai
-    vo = voyageai.Client(api_key=os.environ.get("VOYAGE_API_KEY", ""))
     response = vo.embed(
         [text.strip()],
         model="voyage-3",
@@ -77,8 +68,7 @@ def get_embedding(text):
 # ── Upload function ───────────────────────────────────────────
 def embed_and_upload(corpus, label):
     """
-    Embed each abstract in the corpus and upload to Pinecone
-    with full metadata for Stage 2 filtered retrieval.
+    Embed each abstract and upload to Pinecone with full metadata.
 
     Parameters:
         corpus (list of dicts): funded_corpus or unfunded_corpus
@@ -90,11 +80,8 @@ def embed_and_upload(corpus, label):
         pi_name = entry.get("pi", "unknown")
         print(f"  Embedding {label} example {i}/{len(corpus)}: {pi_name} ...")
 
-        # Get the vector for this abstract
         embedding = get_embedding(entry["text"])
 
-        # Build the metadata dict — all fields available for
-        # Pinecone filtered retrieval in Stage 2
         metadata = {
             "text":          entry["text"].strip(),
             "label":         entry.get("label", label),
@@ -108,7 +95,6 @@ def embed_and_upload(corpus, label):
             "notes":         entry.get("notes", "")
         }
 
-        # Pinecone vector ID — label + index for easy identification
         vector_id = f"{label}-{i:03d}"
 
         vectors.append({
@@ -117,7 +103,6 @@ def embed_and_upload(corpus, label):
             "metadata": metadata
         })
 
-    # Upload all vectors for this label in one batch
     print(f"\n  Uploading {len(vectors)} {label} vectors to Pinecone...")
     index.upsert(vectors=vectors)
     print(f"  ✅ {label.capitalize()} examples uploaded successfully.\n")
@@ -137,15 +122,12 @@ if __name__ == "__main__":
     print(f"  Total to embed:    {len(funded_corpus) + len(unfunded_corpus)}")
     print()
 
-    # Embed and upload funded examples
     print("── Funded examples ─────────────────────────────────────")
     funded_count = embed_and_upload(funded_corpus, "funded")
 
-    # Embed and upload unfunded examples
     print("── Unfunded examples ───────────────────────────────────")
     unfunded_count = embed_and_upload(unfunded_corpus, "unfunded")
 
-    # Final verification
     final_stats = index.describe_index_stats()
     total = final_stats['total_vector_count']
 
@@ -154,5 +136,5 @@ if __name__ == "__main__":
     print(f"  Funded:   {funded_count}")
     print(f"  Unfunded: {unfunded_count}")
     print()
-    print("  Next step: run retriever.py to test similarity search.")
+    print("  Next step: build and run retriever.py.")
     print("=" * 60)
