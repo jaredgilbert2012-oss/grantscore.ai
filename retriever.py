@@ -4,59 +4,89 @@
 # PURPOSE:
 #   Given a new grant abstract, find the most semantically
 #   similar funded and unfunded examples from the Pinecone
-#   vector database. These replace the hardcoded corpus lists
-#   in grantscore_app.py for dynamic, context-aware retrieval.
+#   vector database.
 #
-# HOW IT WORKS:
-#   1. Embed the incoming grant draft using voyage-3
-#      (input_type="query" for search, vs "document" for storage)
-#   2. Query Pinecone separately for funded and unfunded matches
-#   3. Return the top-N most similar abstracts as plain strings
-#      ready to drop into the existing build_prompt() function
+# KEY DESIGN: Keys are read lazily inside get_clients() rather
+#   than at module load time. This is critical for Streamlit
+#   Cloud, where st.secrets is only available after the app
+#   starts — not at import time.
 #
 # USAGE:
 #   Imported by grantscore_app.py:
 #     from retriever import retrieve_similar
 #     funded_texts, unfunded_texts = retrieve_similar(draft_text)
 #
-#   Can also be tested standalone:
+#   Standalone test:
 #     python3 retriever.py
-#
-# ENVIRONMENT VARIABLES REQUIRED:
-#   export PINECONE_API_KEY="..."
-#   export VOYAGE_API_KEY="pa-..."
-#   (ANTHROPIC_API_KEY not needed here — retriever uses Voyage only)
 # ============================================================
 
 import os
-import voyageai
-import streamlit as st
-from pinecone import Pinecone
 
-# ── Configuration ─────────────────────────────────────────────
-# Read keys from environment or Streamlit secrets
-try:
-    PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY") or st.secrets.get("PINECONE_API_KEY", "")
-    VOYAGE_API_KEY   = os.environ.get("VOYAGE_API_KEY")   or st.secrets.get("VOYAGE_API_KEY", "")
-except Exception:
-    PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY", "")
-    VOYAGE_API_KEY   = os.environ.get("VOYAGE_API_KEY", "")
-INDEX_NAME       = "grantscore-corpus"
+INDEX_NAME = "grantscore-corpus"
 
-# ── Connect to services ───────────────────────────────────────
-vo    = voyageai.Client(api_key=VOYAGE_API_KEY)
-pc    = Pinecone(api_key=PINECONE_API_KEY)
-index = pc.Index(INDEX_NAME)
+# ── Key resolution ────────────────────────────────────────────
+def _get_key(name):
+    """
+    Read a key from environment variables first, then fall back
+    to Streamlit secrets. Trying st.secrets at module load time
+    fails on Streamlit Cloud — this defers the read until the
+    function is actually called, by which time secrets are ready.
+    """
+    # Check environment variable first (local dev)
+    value = os.environ.get(name, "")
+    if value:
+        return value
+
+    # Fall back to Streamlit secrets (Streamlit Cloud)
+    try:
+        import streamlit as st
+        return st.secrets.get(name, "")
+    except Exception:
+        return ""
+
+
+# ── Lazy client initialisation ────────────────────────────────
+_vo    = None
+_index = None
+
+def get_clients():
+    """
+    Initialise Voyage AI and Pinecone clients on first call.
+    Reuses existing clients on subsequent calls (singleton pattern).
+    Reading keys here rather than at module level ensures
+    st.secrets is available when this runs on Streamlit Cloud.
+    """
+    global _vo, _index
+
+    if _vo is None or _index is None:
+        import voyageai
+        from pinecone import Pinecone
+
+        pinecone_key = _get_key("PINECONE_API_KEY")
+        voyage_key   = _get_key("VOYAGE_API_KEY")
+
+        if not pinecone_key or not voyage_key:
+            raise ValueError(
+                "PINECONE_API_KEY and VOYAGE_API_KEY must be set. "
+                "Export them as environment variables or add them to "
+                "Streamlit secrets."
+            )
+
+        _vo    = voyageai.Client(api_key=voyage_key)
+        pc     = Pinecone(api_key=pinecone_key)
+        _index = pc.Index(INDEX_NAME)
+
+    return _vo, _index
 
 
 # ── Embedding function ────────────────────────────────────────
 def get_query_embedding(text):
     """
     Embed an incoming grant draft for similarity search.
-    Uses input_type="query" which is optimised for search
+    input_type="query" is optimised for search queries
     (vs "document" used in embed_corpus.py for storage).
-    Using the correct input_type improves retrieval accuracy.
     """
+    vo, _ = get_clients()
     response = vo.embed(
         [text.strip()],
         model="voyage-3",
@@ -79,14 +109,11 @@ def retrieve_similar(draft_text, n_funded=5, n_unfunded=3):
     Returns:
         funded_texts   (list of str): Most similar funded abstracts
         unfunded_texts (list of str): Most similar unfunded abstracts
-
-    Usage in grantscore_app.py:
-        funded_texts, unfunded_texts = retrieve_similar(draft_text)
     """
-    # Step 1 — Embed the incoming draft as a search query
+    _, index = get_clients()
+
     query_vector = get_query_embedding(draft_text)
 
-    # Step 2 — Find most similar funded examples
     funded_results = index.query(
         vector=query_vector,
         top_k=n_funded,
@@ -94,7 +121,6 @@ def retrieve_similar(draft_text, n_funded=5, n_unfunded=3):
         include_metadata=True
     )
 
-    # Step 3 — Find most similar unfunded examples
     unfunded_results = index.query(
         vector=query_vector,
         top_k=n_unfunded,
@@ -102,8 +128,6 @@ def retrieve_similar(draft_text, n_funded=5, n_unfunded=3):
         include_metadata=True
     )
 
-    # Step 4 — Extract text from results
-    # Returns plain strings ready for build_prompt()
     funded_texts = [
         match["metadata"]["text"]
         for match in funded_results["matches"]
@@ -117,17 +141,14 @@ def retrieve_similar(draft_text, n_funded=5, n_unfunded=3):
     return funded_texts, unfunded_texts
 
 
-# ── Retrieval with metadata (for debugging/logging) ───────────
+# ── Retrieval with metadata (debugging) ──────────────────────
 def retrieve_similar_with_metadata(draft_text, n_funded=5, n_unfunded=3):
     """
-    Same as retrieve_similar() but also returns match scores
-    and metadata. Useful for debugging and understanding which
-    corpus examples are being selected and why.
-
-    Returns:
-        funded_matches   (list of dicts): {text, score, pi, source, ...}
-        unfunded_matches (list of dicts): {text, score, notes, ...}
+    Same as retrieve_similar() but also returns similarity scores
+    and metadata. Used for debugging and the standalone test below.
     """
+    _, index = get_clients()
+
     query_vector = get_query_embedding(draft_text)
 
     funded_results = index.query(
@@ -146,12 +167,12 @@ def retrieve_similar_with_metadata(draft_text, n_funded=5, n_unfunded=3):
 
     funded_matches = [
         {
-            "text":    match["metadata"]["text"],
-            "score":   round(match["score"], 4),
-            "pi":      match["metadata"].get("pi", "unknown"),
-            "source":  match["metadata"].get("source", "unknown"),
-            "tier":    match["metadata"].get("tier", "unknown"),
-            "notes":   match["metadata"].get("notes", "")
+            "text":   match["metadata"]["text"],
+            "score":  round(match["score"], 4),
+            "pi":     match["metadata"].get("pi", "unknown"),
+            "source": match["metadata"].get("source", "unknown"),
+            "tier":   match["metadata"].get("tier", "unknown"),
+            "notes":  match["metadata"].get("notes", "")
         }
         for match in funded_results["matches"]
     ]
@@ -170,10 +191,6 @@ def retrieve_similar_with_metadata(draft_text, n_funded=5, n_unfunded=3):
 
 # ── Standalone test ───────────────────────────────────────────
 if __name__ == "__main__":
-    """
-    Test the retriever with a sample grant abstract.
-    Run: python3 retriever.py
-    """
 
     TEST_ABSTRACT = """
     Anxiety disorders affect approximately 31% of young adults in the
