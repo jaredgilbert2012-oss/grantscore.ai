@@ -49,11 +49,11 @@ try:
     pinecone_key = os.environ.get("PINECONE_API_KEY") or st.secrets.get("PINECONE_API_KEY", "")
     voyage_key   = os.environ.get("VOYAGE_API_KEY")   or st.secrets.get("VOYAGE_API_KEY", "")
 
-if pinecone_key and voyage_key:
-    STAGE2_AVAILABLE = True
+    if pinecone_key and voyage_key:
+      STAGE2_AVAILABLE = True
 
-  except Exception:
-      pass
+except Exception:
+  pass
 
 # Static corpus fallback (Stage 1 behavior)
 if not STAGE2_AVAILABLE:
