@@ -52,8 +52,8 @@ try:
 if pinecone_key and voyage_key:
     STAGE2_AVAILABLE = True
 
-except Exception:
-    pass
+  except Exception:
+      pass
 
 # Static corpus fallback (Stage 1 behavior)
 if not STAGE2_AVAILABLE:
