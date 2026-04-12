@@ -4,21 +4,21 @@ Built with Streamlit
 
 Changes in v0.3:
   - Stage 2 RAG enabled: dynamic retrieval from Pinecone
-  - Corpus examples now selected by semantic similarity to input
+  - Corpus examples selected by semantic similarity to input
+  - Stage 2 detection deferred to run-time (not import time)
+    so Streamlit secrets are available when keys are read
   - Falls back to static corpus if retriever unavailable
-  - Retrieval mode shown in report caption
+  - Retrieval mode shown in report caption and sidebar
 
 To run locally:
     pip install streamlit anthropic voyageai pinecone
-    streamlit run grantscore_app.py
-
-Environment variables required for Stage 2 retrieval:
     export PINECONE_API_KEY="..."
     export VOYAGE_API_KEY="pa-..."
+    streamlit run grantscore_app.py
 
-To share:
-    Deploy free at share.streamlit.io
-    Set PINECONE_API_KEY and VOYAGE_API_KEY in Streamlit secrets
+On Streamlit Cloud:
+    Add PINECONE_API_KEY and VOYAGE_API_KEY to app Secrets
+    (Settings → Secrets in the Streamlit dashboard)
 """
 
 import os
@@ -37,25 +37,37 @@ st.title("🎯 GrantScore AI")
 st.caption("Predictive grant scoring powered by historical outcome data.")
 st.divider()
 
-# ── Stage 2: Dynamic retrieval setup ─────────────────────────
-# Attempt to load the retriever. If Pinecone/Voyage keys are not
-# available (e.g. Streamlit Cloud without secrets set), falls back
-# gracefully to the static corpus so the app never breaks.
+# ── Key resolution helper ─────────────────────────────────────
+def get_secret(name):
+    """
+    Read a secret from environment variables first,
+    then fall back to Streamlit secrets.
+    Called at run-time (not import time) so st.secrets
+    is fully initialised when this executes on Streamlit Cloud.
+    """
+    value = os.environ.get(name, "")
+    if value:
+        return value
+    try:
+        return st.secrets.get(name, "")
+    except Exception:
+        return ""
 
-STAGE2_AVAILABLE = False
+# ── Stage 2 availability check ────────────────────────────────
+# Import retriever module (safe — no connections made at import)
+# Actual connection happens inside retrieve_similar() on first call
+def check_stage2():
+    try:
+        from retriever import retrieve_similar  # noqa: F401
+        pinecone_key = get_secret("PINECONE_API_KEY")
+        voyage_key   = get_secret("VOYAGE_API_KEY")
+        return bool(pinecone_key and voyage_key)
+    except Exception:
+        return False
 
-try:
-    from retriever import retrieve_similar
-    pinecone_key = os.environ.get("PINECONE_API_KEY") or st.secrets.get("PINECONE_API_KEY", "")
-    voyage_key   = os.environ.get("VOYAGE_API_KEY")   or st.secrets.get("VOYAGE_API_KEY", "")
+STAGE2_AVAILABLE = check_stage2()
 
-    if pinecone_key and voyage_key:
-      STAGE2_AVAILABLE = True
-
-except Exception:
-  pass
-
-# Static corpus fallback (Stage 1 behavior)
+# Static corpus fallback (used when Stage 2 is unavailable)
 if not STAGE2_AVAILABLE:
     from corpus import funded_examples_text, unfunded_examples_text
 
@@ -153,7 +165,6 @@ with st.sidebar:
 
     st.divider()
 
-    # Stage indicator
     if STAGE2_AVAILABLE:
         st.success("⚡ Stage 2 active — dynamic retrieval enabled")
     else:
@@ -330,6 +341,7 @@ if run_button:
         try:
             # ── Stage 2: dynamic retrieval ────────────────────
             if STAGE2_AVAILABLE:
+                from retriever import retrieve_similar
                 funded_texts, unfunded_texts = retrieve_similar(
                     draft_text,
                     n_funded=5,
