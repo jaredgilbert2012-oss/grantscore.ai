@@ -30,11 +30,17 @@
 
 import os
 import voyageai
+import streamlit as st
 from pinecone import Pinecone
 
 # ── Configuration ─────────────────────────────────────────────
-PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY", "")
-VOYAGE_API_KEY   = os.environ.get("VOYAGE_API_KEY", "")
+# Read keys from environment or Streamlit secrets
+try:
+    PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY") or st.secrets.get("PINECONE_API_KEY", "")
+    VOYAGE_API_KEY   = os.environ.get("VOYAGE_API_KEY")   or st.secrets.get("VOYAGE_API_KEY", "")
+except Exception:
+    PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY", "")
+    VOYAGE_API_KEY   = os.environ.get("VOYAGE_API_KEY", "")
 INDEX_NAME       = "grantscore-corpus"
 
 # ── Connect to services ───────────────────────────────────────
